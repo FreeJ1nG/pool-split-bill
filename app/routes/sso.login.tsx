@@ -3,7 +3,7 @@ import { type ActionFunctionArgs, redirect } from '@remix-run/node'
 import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import { XMLParser } from 'fast-xml-parser'
-import type { Document, WithId } from 'mongodb'
+import type { Document, WithId, WithoutId } from 'mongodb'
 
 import { issueJwt } from '~/lib/auth.ts'
 import type { User } from '~/schemas/auth.ts'
@@ -34,7 +34,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const email = userAttributes['cas:user'] + '@ui.ac.id'
 
   const db = await getDb()
-  let user: WithId<Document> | User | null = await db
+  let user: WithId<Document> | WithoutId<User> | null = await db
     .collection('users')
     .findOne({ email })
 
@@ -50,7 +50,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       npm: userAttributes['cas:attributes']['cas:npm'],
       createdAt: dayjs().unix(),
       email,
-    } satisfies User
+    } satisfies WithoutId<User>
     const { acknowledged } = await db
       .collection('users')
       .insertOne(userToCreate)

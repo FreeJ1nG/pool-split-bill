@@ -12,7 +12,7 @@ const customStylistic = stylistic.configs.customize({
 })
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'build'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

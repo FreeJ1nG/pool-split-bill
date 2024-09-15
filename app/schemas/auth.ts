@@ -1,6 +1,8 @@
+import { ObjectId } from 'mongodb'
 import { z } from 'zod'
 
 export const userSchema = z.object({
+  _id: z.instanceof(ObjectId).transform(id => id.toString('base64')),
   name: z.string(),
   org: z.string(),
   npm: z.number(),

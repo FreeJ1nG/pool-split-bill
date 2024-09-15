@@ -16,7 +16,7 @@ export const meta: MetaFunction = () => {
 
 export const loader = async () => {
   const db = await getDb()
-  const sessions = await db.collection('session').find({}).limit(10).toArray()
+  const sessions = await db.collection('bills').find({}).limit(10).toArray()
   const bills = getBillSchema.parse(sessions)
   return json({ bills })
 }
@@ -32,7 +32,7 @@ export default function Index() {
         Create New
       </Button>
       {bills.map((bill, i) => (
-        <div
+        <button
           key={i}
           className="flex w-full flex-col rounded-xl border border-gray-600 p-4 py-3 text-sm shadow-md"
         >
@@ -52,7 +52,7 @@ export default function Index() {
               currency: 'IDR',
             }).format(bill.price)}
           </div>
-        </div>
+        </button>
       ))}
     </div>
   )

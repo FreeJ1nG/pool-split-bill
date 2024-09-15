@@ -1,9 +1,13 @@
-import { type ActionFunctionArgs, redirect } from '@remix-run/node'
-import { Form, useLocation, useSubmit } from '@remix-run/react'
+import { type ActionFunctionArgs, json, redirect } from '@remix-run/node'
+import { Form, useLoaderData, useLocation, useSubmit } from '@remix-run/react'
+import type { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import { getDb } from 'db/init.ts'
 import type { FormEvent } from 'react'
 import { useCallback, useState } from 'react'
+import { z } from 'zod'
 
+import CreateBillParticipantsCommand from '~/components/create-bill/command.tsx'
 import { Button } from '~/components/ui/button.tsx'
 import { Input } from '~/components/ui/input.tsx'
 import { Label } from '~/components/ui/label.tsx'
@@ -15,30 +19,42 @@ import {
 } from '~/components/ui/tabs.tsx'
 import { UploadDropzone } from '~/components/ut/upload-dropzone.tsx'
 import { convertToJson } from '~/lib/utils.ts'
-import { billSchema, type Participant } from '~/schemas/bill.ts'
+import { userSchema } from '~/schemas/auth.ts'
+import type { Participant } from '~/schemas/bill.ts'
+import { createBillSchema } from '~/schemas/bill.ts'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData()
   const db = await getDb()
-  const collection = db.collection('session')
-  const result = await collection.insertOne(
-    convertToJson(formData, billSchema),
-  )
+  const collection = db.collection('bills')
+  const data = convertToJson(formData, createBillSchema)
+  const result = await collection.insertOne(data)
   if (result.acknowledged) return redirect('/')
   return redirect('/new')
+}
+
+export const loader = async () => {
+  const db = await getDb()
+  const collection = db.collection('users')
+  const userArray = await collection.find({}).toArray()
+  const users = z.array(userSchema).parse(userArray)
+  return json({ users })
 }
 
 export default function CreateForm() {
   const submit = useSubmit()
   const { search } = useLocation()
+  const { users } = useLoaderData<typeof loader>()
   const [file, setFile] = useState<File | undefined>(undefined)
+  const [startTime, setStartTime] = useState<Dayjs>(dayjs())
+  const [endTime, setEndTime] = useState<Dayjs>(dayjs())
   const [participants, setParticipants] = useState<Participant[]>([])
 
   const handleSubmit = useCallback(
     (event: FormEvent) => {
       event.preventDefault()
       const formData = new FormData(event.currentTarget as HTMLFormElement)
-      formData.append('participants[]', JSON.stringify(participants))
+      formData.append('participants', JSON.stringify(participants))
       submit(formData, { method: 'POST' })
     },
     [participants, submit],
@@ -55,6 +71,9 @@ export default function CreateForm() {
           <Form onSubmit={handleSubmit}>
             <Label htmlFor="startTime">Start time</Label>
             <Input
+              value={startTime.format('YYYY-MM-DDTHH:mm')}
+              onChange={e => setStartTime(dayjs(e.target.value))}
+              id="startTime"
               name="startTime"
               type="datetime-local"
               className="mb-3 w-fit"
@@ -62,13 +81,29 @@ export default function CreateForm() {
 
             <Label htmlFor="endTime">End time</Label>
             <Input
+              value={endTime.format('YYYY-MM-DDTHH:mm')}
+              onChange={e => setEndTime(dayjs(e.target.value))}
+              id="endTime"
               name="endTime"
               type="datetime-local"
               className="mb-3 w-fit"
             />
 
             <Label htmlFor="price">Price</Label>
-            <Input name="price" type="number" />
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              placeholder="Insert the total price"
+            />
+
+            <CreateBillParticipantsCommand
+              users={users}
+              participants={participants}
+              setParticipants={setParticipants}
+              startTime={startTime}
+              endTime={endTime}
+            />
 
             <Button type="submit" className="mt-7 w-full">
               Submit
