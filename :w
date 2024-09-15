@@ -1,0 +1,115 @@
+import type { LoaderFunctionArgs } from '@remix-run/node'
+import { type ActionFunctionArgs, redirect } from '@remix-run/node'
+import { useSubmit } from '@remix-run/react'
+import dayjs from 'dayjs'
+import { getDb } from 'db/init'
+import { XMLParser } from 'fast-xml-parser'
+import type { Document, WithId } from 'mongodb'
+import { useEffect } from 'react'
+
+import { issueJwt } from '~/lib/auth.ts'
+import type { User } from '~/schemas/auth.ts'
+import { ssoValidateTicketResponseSchema, userSchema } from '~/schemas/auth.ts'
+import { commitSession, getSession } from '~/sessions.ts'
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const session = await getSession(request.headers.get('Cookie'))
+
+  const formData = await request.formData()
+  const ticket = formData.get('ticket')
+  const service = formData.get('service')
+
+  const resp = await fetch(
+    `https://sso.ui.ac.id/cas2/serviceValidate?ticket=${ticket}&service=${service}`,
+  )
+  if (!resp.ok) throw new Error('Unable to validate ticket and service')
+
+  const parser = new XMLParser()
+  const data = parser.parse(await resp.text())
+  const userData = ssoValidateTicketResponseSchema.parse(data)
+  const userAttributes =
+    userData['cas:serviceResponse']['cas:authenticationSuccess']
+  const email = userAttributes['cas:user'] + '@ui.ac.id'
+
+  const db = await getDb()
+  let user: WithId<Document> | User | null = await db
+    .collection('users')
+    .findOne({ email })
+
+  if (user) {
+    // User already exists, issue new JWT
+    user = userSchema.parse(user)
+  }
+  else {
+    // Create user and issue JWT
+    const userToCreate = {
+      name: userAttributes['cas:attributes']['cas:nama'],
+      org: userAttributes['cas:attributes']['cas:kd_org'],
+      npm: userAttributes['cas:attributes']['cas:npm'],
+      createdAt: new Date().getTime(),
+      email,
+    } satisfies User
+    const { acknowledged } = await db
+      .collection('users')
+      .insertOne(userToCreate)
+    if (!acknowledged)
+      throw new Error(
+        `Something went wrong when trying to create the user ${userToCreate.email}`,
+      )
+    user = userToCreate
+  }
+
+  session.set('accessToken', await issueJwt(user.email))
+  const back = session.get('backUrl')
+  session.unset('backUrl')
+
+  return redirect(back ?? '/', {
+    headers: {
+      'Set-Cookie': await commitSession(session, {
+        expires: dayjs().add(30, 'day').toDate(),
+      }),
+    },
+  })
+}
+
+export const loader = ({ request }: LoaderFunctionArgs) => {
+  const urlSplit = request.url.split('?')
+  const params = new URLSearchParams(request.url.split('?')[1])
+  const service = window.location.href.replace(window.location.search, '')
+  const ticket = params.get('ticket')
+
+  if (ticket) {
+    try {
+      (async () => {
+        const formData = new FormData()
+        formData.set('ticket', ticket)
+        formData.set('service', service)
+        submit(formData, { method: 'POST' })
+      })()
+    }
+    catch (err) {
+      console.error(err)
+      throw err
+    }
+  }
+  else {
+    if (typeof window !== 'undefined') {
+      window.location.href = `https://sso.ui.ac.id/cas2/login?service=${encodeURIComponent(
+        service,
+      )}`
+    }
+  }
+  return null
+}
+
+export default function SsoLogin() {
+  const submit = useSubmit()
+
+  useEffect(() => {}, [submit])
+
+  return (
+    <div className="flex h-dvh w-full items-center justify-center">
+      <div>Loging in ...</div>
+    </div>
+  )
+}
