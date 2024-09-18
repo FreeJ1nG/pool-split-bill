@@ -67,10 +67,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     const db = await getDb()
     const user = await db.collection('users').findOne({ email: jwtToken.sub })
-    console.log(' >> user:', user)
 
     userData = userSchema.parse(user)
-    console.log(' >> userData:', userData)
   }
   catch (e) {
     console.log(e)
