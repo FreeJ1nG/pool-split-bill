@@ -51,7 +51,7 @@ export default function CreateBillParticipantsCommand({
     ) =>
       (event?: ChangeEvent<HTMLInputElement>) => {
         setParticipants((prev) => {
-          const toBeDeleted = prev.find(p => p.email === user.email)
+          const toBeDeleted = prev.find(p => p.user.email === user.email)
 
           if (!toBeDeleted) return [...prev]
 
@@ -61,7 +61,7 @@ export default function CreateBillParticipantsCommand({
               : newValueFactory
 
           return [
-            ...prev.filter(p => p.email !== user.email),
+            ...prev.filter(p => p.user.email !== user.email),
             {
               ...toBeDeleted,
               ...newValue,
@@ -80,25 +80,22 @@ export default function CreateBillParticipantsCommand({
         <CommandEmpty>No players found.</CommandEmpty>
         <CommandGroup>
           {users.map((user) => {
-            const includesThisUser = participants.some(
-              ({ email }) => email === user.email,
-            )
             const participant = participants.find(
-              ({ email }) => email === user.email,
+              ({ user: { email } }) => email === user.email,
             )
             return (
               <CommandItem key={user.email}>
                 <div className="flex w-full items-center justify-between">
                   <div className="flex items-center">
                     <Checkbox
-                      checked={includesThisUser}
+                      checked={!!participant}
                       onCheckedChange={(checked) => {
                         const newChecked = checked.valueOf()
                         if (newChecked) {
                           setParticipants(prev => [
                             ...prev,
                             {
-                              email: user.email,
+                              user,
                               startTime: startTime.unix(),
                               endTime: endTime.unix(),
                             },
@@ -106,7 +103,9 @@ export default function CreateBillParticipantsCommand({
                         }
                         else {
                           setParticipants(prev => [
-                            ...prev.filter(({ email }) => user.email !== email),
+                            ...prev.filter(
+                              ({ user: { email } }) => user.email !== email,
+                            ),
                           ])
                         }
                       }}

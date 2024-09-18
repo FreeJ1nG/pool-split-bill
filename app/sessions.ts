@@ -5,7 +5,7 @@ export type SessionData = {
   backUrl: string
 }
 
-type SessionFlashData = {
+export type SessionFlashData = {
   error: string
 }
 

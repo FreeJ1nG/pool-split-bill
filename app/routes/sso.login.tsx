@@ -5,6 +5,7 @@ import { getDb } from 'db/init'
 import { XMLParser } from 'fast-xml-parser'
 import type { Document, WithId, WithoutId } from 'mongodb'
 
+import { PROFILE_COLOR_CHOICES } from '~/constants/color.ts'
 import { issueJwt } from '~/lib/auth.ts'
 import type { User } from '~/schemas/auth.ts'
 import { ssoValidateTicketResponseSchema, userSchema } from '~/schemas/auth.ts'
@@ -49,6 +50,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       org: userAttributes['cas:attributes']['cas:kd_org'],
       npm: userAttributes['cas:attributes']['cas:npm'],
       createdAt: dayjs().unix(),
+      fallbackProfileColor:
+        PROFILE_COLOR_CHOICES[
+          Math.floor(Math.random() * PROFILE_COLOR_CHOICES.length)
+        ],
       email,
     } satisfies WithoutId<User>
     const { acknowledged } = await db

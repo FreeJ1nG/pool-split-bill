@@ -17,16 +17,15 @@ import {
 import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import jwt from 'jsonwebtoken'
-import { useEffect } from 'react'
 
-import Navbar from '~/components/navbar.tsx'
+import Navbar from '~/components/navbar/index.tsx'
+import { AuthStoreProvider } from '~/lib/providers/auth-store.tsx'
 import {
   sessionJwtTokenSchema,
   type User,
   userSchema,
 } from '~/schemas/auth.ts'
 import { commitSession, getSession } from '~/sessions.ts'
-import { useAuthStore } from '~/store/auth.ts'
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -36,8 +35,8 @@ export const links: LinksFunction = () => [
     crossOrigin: 'anonymous',
   },
   {
+    href: 'https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
   },
 ]
 
@@ -68,8 +67,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     const db = await getDb()
     const user = await db.collection('users').findOne({ email: jwtToken.sub })
+    console.log(' >> user:', user)
 
     userData = userSchema.parse(user)
+    console.log(' >> userData:', userData)
   }
   catch (e) {
     console.log(e)
@@ -79,12 +80,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { setUser } = useAuthStore()
   const { userData } = useLoaderData<typeof loader>()
-
-  useEffect(() => {
-    setUser(userData)
-  }, [userData, setUser])
 
   return (
     <html lang="en">
@@ -95,7 +91,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AuthStoreProvider userData={userData}>{children}</AuthStoreProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -107,7 +103,7 @@ export default function App() {
   const { userData } = useLoaderData<typeof loader>()
 
   return (
-    <div className="relative h-dvh w-full">
+    <div className="relative h-dvh w-full font-poppins">
       <Navbar userData={userData} />
       <div className="h-14"></div>
       <div className="px-8 py-6">

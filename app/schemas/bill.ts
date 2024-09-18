@@ -2,27 +2,30 @@ import dayjs from 'dayjs'
 import { ObjectId } from 'mongodb'
 import { z } from 'zod'
 
+import { userBuilderSchema, userSchema } from './auth.ts'
+
 export const participantSchema = z.object({
   startTime: z.number(),
   endTime: z.number(),
-  email: z.string(),
+  user: userSchema,
 })
 
 export type Participant = z.infer<typeof participantSchema>
 
 export const billSchema = z.object({
-  _id: z.instanceof(ObjectId).transform(id => id.toString('base64')),
+  _id: z.instanceof(ObjectId).transform(id => id.toHexString()),
   startTime: z.number(),
   endTime: z.number(),
   price: z.number(),
   participants: z.array(participantSchema),
+  owner: userSchema,
 })
 
 export type Bill = z.infer<typeof billSchema>
 
-export const getBillSchema = z.array(billSchema)
+export const getBillsSchema = z.array(billSchema)
 
-export type GetBillSchema = z.infer<typeof getBillSchema>
+export type GetBillsSchema = z.infer<typeof getBillsSchema>
 
 export const createBillSchema = billSchema.omit({ _id: true }).extend({
   startTime: z.preprocess(
@@ -39,8 +42,13 @@ export const createBillSchema = billSchema.omit({ _id: true }).extend({
   ),
   participants: z.preprocess(
     arg => (typeof arg === 'string' ? JSON.parse(arg) : arg),
-    z.array(participantSchema),
+    z.array(
+      participantSchema.extend({
+        user: userBuilderSchema,
+      }),
+    ),
   ),
+  owner: userBuilderSchema,
 })
 
 export type CreateBillSchema = z.infer<typeof createBillSchema>

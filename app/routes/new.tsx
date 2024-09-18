@@ -1,7 +1,6 @@
 import { type ActionFunctionArgs, json, redirect } from '@remix-run/node'
 import { Form, useLoaderData, useLocation, useSubmit } from '@remix-run/react'
-import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import { getDb } from 'db/init.ts'
 import type { FormEvent } from 'react'
 import { useCallback, useState } from 'react'
@@ -18,16 +17,19 @@ import {
   TabsTrigger,
 } from '~/components/ui/tabs.tsx'
 import { UploadDropzone } from '~/components/ut/upload-dropzone.tsx'
+import { getUserFromRequest } from '~/lib/auth.ts'
+import { useAuthStore } from '~/lib/providers/auth-store.tsx'
 import { convertToJson } from '~/lib/utils.ts'
 import { userSchema } from '~/schemas/auth.ts'
-import type { Participant } from '~/schemas/bill.ts'
-import { createBillSchema } from '~/schemas/bill.ts'
+import { createBillSchema, type Participant } from '~/schemas/bill.ts'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData()
   const db = await getDb()
   const collection = db.collection('bills')
-  const data = convertToJson(formData, createBillSchema)
+  const owner = await getUserFromRequest(request)
+  const data = convertToJson(formData, createBillSchema, { owner })
+  if (!owner) return redirect('/new')
   const result = await collection.insertOne(data)
   if (result.acknowledged) return redirect('/')
   return redirect('/new')
@@ -42,13 +44,24 @@ export const loader = async () => {
 }
 
 export default function CreateForm() {
+  const user = useAuthStore(state => state.user)
   const submit = useSubmit()
   const { search } = useLocation()
   const { users } = useLoaderData<typeof loader>()
   const [file, setFile] = useState<File | undefined>(undefined)
   const [startTime, setStartTime] = useState<Dayjs>(dayjs())
   const [endTime, setEndTime] = useState<Dayjs>(dayjs())
-  const [participants, setParticipants] = useState<Participant[]>([])
+  const [participants, setParticipants] = useState<Participant[]>(
+    user
+      ? [
+          {
+            startTime: startTime.unix(),
+            endTime: endTime.unix(),
+            user,
+          },
+        ]
+      : [],
+  )
 
   const handleSubmit = useCallback(
     (event: FormEvent) => {

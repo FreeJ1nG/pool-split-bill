@@ -1,17 +1,33 @@
 import { ObjectId } from 'mongodb'
 import { z } from 'zod'
 
+export const paymentDetailSchema = z.object({
+  provider: z.string(),
+  account: z.string(),
+})
+
 export const userSchema = z.object({
-  _id: z.instanceof(ObjectId).transform(id => id.toString('base64')),
+  _id: z.instanceof(ObjectId).transform(id => id.toHexString()),
   name: z.string(),
   org: z.string(),
   npm: z.number(),
   email: z.string(),
   createdAt: z.number(),
+  fallbackProfileColor: z.string().optional(),
   profileSrc: z.string().optional(),
+  paymentDetail: z.array(paymentDetailSchema).optional(),
 })
 
 export type User = z.infer<typeof userSchema>
+
+export const userBuilderSchema = userSchema.extend({
+  _id: z.preprocess(
+    arg => (typeof arg === 'string' ? new ObjectId(arg) : arg),
+    z.instanceof(ObjectId),
+  ),
+})
+
+export type UserBuilder = z.infer<typeof userBuilderSchema>
 
 export const ssoValidateTicketResponseSchema = z.object({
   'cas:serviceResponse': z.object({

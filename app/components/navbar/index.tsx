@@ -10,7 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu.tsx'
+import { useAuthStore } from '~/lib/providers/auth-store.tsx'
 import type { User } from '~/schemas/auth.ts'
+
+import ProfileColorPicker from './color-picker.tsx'
 
 export interface NavbarProps {
   userData?: User
@@ -18,6 +21,7 @@ export interface NavbarProps {
 
 export default function Navbar({ userData }: NavbarProps) {
   const navigate = useNavigate()
+  const user = useAuthStore(state => state.user)
 
   return (
     <div className="fixed left-0 right-0 top-0 flex h-14 items-center justify-between bg-black px-5 text-white">
@@ -38,8 +42,13 @@ export default function Navbar({ userData }: NavbarProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel>{userData?.email}</DropdownMenuLabel>
+          {userData && <ProfileColorPicker userData={userData} />}
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Add avatar</DropdownMenuItem>
+          {user && (
+            <DropdownMenuItem onClick={() => navigate(`/profile/${user?._id}`)}>
+              View Profile
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => navigate('/sso/logout')}>
             Log out
           </DropdownMenuItem>
