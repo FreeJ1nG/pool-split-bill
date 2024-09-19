@@ -4,6 +4,7 @@ import {
   json,
   type LinksFunction,
   type LoaderFunctionArgs,
+  type MetaFunction,
   redirect,
 } from '@remix-run/node'
 import {
@@ -26,6 +27,16 @@ import {
   userSchema,
 } from '~/schemas/auth.ts'
 import { commitSession, getSession } from '~/sessions.ts'
+
+export const meta: MetaFunction = () => {
+  return [
+    {
+      title: 'Pool Split Bill',
+      content:
+        'Split your pool bill fairly here! it\'s as simple as the click of a button',
+    },
+  ]
+}
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -71,7 +82,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     userData = userSchema.parse(user)
   }
   catch (e) {
-    console.log(e)
+    console.log('unable to parse user:', e)
   }
 
   return json({ userData })

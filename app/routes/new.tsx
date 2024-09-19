@@ -85,7 +85,21 @@ export default function CreateForm() {
             <Label htmlFor="startTime">Start time</Label>
             <Input
               value={startTime.format('YYYY-MM-DDTHH:mm')}
-              onChange={e => setStartTime(dayjs(e.target.value))}
+              onChange={(e) => {
+                const newStartTime = dayjs(e.target.value)
+                setStartTime(newStartTime)
+                setParticipants(prev => [
+                  ...prev.map(participant =>
+                    participant.startTime === startTime.unix() &&
+                    participant.endTime === endTime.unix()
+                      ? {
+                          ...participant,
+                          startTime: newStartTime.unix(),
+                        }
+                      : participant,
+                  ),
+                ])
+              }}
               id="startTime"
               name="startTime"
               type="datetime-local"
@@ -95,7 +109,21 @@ export default function CreateForm() {
             <Label htmlFor="endTime">End time</Label>
             <Input
               value={endTime.format('YYYY-MM-DDTHH:mm')}
-              onChange={e => setEndTime(dayjs(e.target.value))}
+              onChange={(e) => {
+                const newEndTime = dayjs(e.target.value)
+                setEndTime(newEndTime)
+                setParticipants(prev => [
+                  ...prev.map(participant =>
+                    participant.startTime === startTime.unix() &&
+                    participant.endTime === endTime.unix()
+                      ? {
+                          ...participant,
+                          endTime: newEndTime.unix(),
+                        }
+                      : participant,
+                  ),
+                ])
+              }}
               id="endTime"
               name="endTime"
               type="datetime-local"

@@ -1,3 +1,4 @@
+import { PopoverClose } from '@radix-ui/react-popover'
 import { useSubmit } from '@remix-run/react'
 import { Pencil } from 'lucide-react'
 import { useCallback, useState } from 'react'
@@ -80,9 +81,11 @@ export default function ProfileColorPicker({
                 </button>
               ))}
             </div>
-            <Button size="sm" className="mt-3" onClick={handleSave}>
-              Save
-            </Button>
+            <PopoverClose asChild>
+              <Button size="sm" className="mt-3" onClick={handleSave}>
+                Save
+              </Button>
+            </PopoverClose>
           </PopoverContent>
         </Popover>
       </div>

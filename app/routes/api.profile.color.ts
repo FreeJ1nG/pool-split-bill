@@ -17,5 +17,5 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       { $set: { fallbackProfileColor: color } },
     )
   if (!acknowledged) return null
-  return redirect('/')
+  return redirect(`/profile/${user._id}`)
 }

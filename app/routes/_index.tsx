@@ -1,4 +1,4 @@
-import { json, type MetaFunction } from '@remix-run/node'
+import { json } from '@remix-run/node'
 import { useLoaderData, useNavigate } from '@remix-run/react'
 import dayjs from 'dayjs'
 import { getDb } from 'db/init'
@@ -14,10 +14,6 @@ import {
 } from '~/lib/utils.ts'
 import type { Bill } from '~/schemas/bill.ts'
 import { getBillsSchema } from '~/schemas/bill.ts'
-
-export const meta: MetaFunction = () => {
-  return [{ title: 'Pool Payment Tracker' }]
-}
 
 export const loader = async () => {
   const db = await getDb()
@@ -38,8 +34,6 @@ export const loader = async () => {
 export default function Index() {
   const navigate = useNavigate()
   const { bills, error } = useLoaderData<typeof loader>()
-
-  console.log(' >> bills:', bills)
 
   return (
     <div className="flex flex-col items-center gap-5">

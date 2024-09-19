@@ -79,13 +79,15 @@ export default function UserProfile() {
             <CardHeader className="px-4 pb-2 pt-4 text-base">
               <CardTitle>Payment Detail</CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-2 pt-2">
-              <div className="flex flex-col gap-2">
-                {user.paymentDetail?.map(({ provider, account }) => (
-                  <Input value={provider + ' - ' + account} disabled />
-                ))}
-              </div>
-            </CardContent>
+            {user.paymentDetail && (
+              <CardContent className="px-4 pb-2 pt-2">
+                <div className="flex flex-col gap-2">
+                  {user.paymentDetail?.map(({ provider, account }) => (
+                    <Input value={provider + ' - ' + account} disabled />
+                  ))}
+                </div>
+              </CardContent>
+            )}
             <CardFooter className="px-4 pb-4">
               <Popover>
                 <PopoverTrigger asChild>

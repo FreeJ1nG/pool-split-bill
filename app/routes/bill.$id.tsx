@@ -22,6 +22,8 @@ export default function BillDetail() {
   const bill = useLoaderData<typeof loader>()
   const [priceMap] = useState(() => calculateParticipantsPrice(bill))
 
+  console.log(' >> bill:', bill)
+
   return (
     <div className="flex flex-col gap-3">
       <div>
@@ -38,16 +40,14 @@ export default function BillDetail() {
         ' hours)'}
       </div>
       <div className="">
-        {bill.participants
-          .filter(({ user: { email } }) => email !== bill.owner.email)
-          .map(participant => (
-            <div key={participant.user._id}>
-              {participant.user.name + ' '}
-              owes
-              {' ' +
-              formatToCurrency(priceMap.get(participant.user.email) ?? 0)}
-            </div>
-          ))}
+        {bill.participants.map(participant => (
+          <div key={participant.user._id}>
+            {participant.user.email === bill.owner.email
+              ? participant.user.name + '(bill owner)'
+              : participant.user.name + ' owes '}
+            {formatToCurrency(priceMap.get(participant.user.email) ?? 0)}
+          </div>
+        ))}
       </div>
     </div>
   )

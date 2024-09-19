@@ -25,14 +25,12 @@ export function calculateParticipantsPrice(bill: Bill): Map<string, number> {
       }
     }
     for (const email of playingAtMinute) {
-      const oldPrice = priceMap.get(email)
       priceMap.set(
         email,
-        (oldPrice ?? 0) + pricePerMinute / playingAtMinute.size,
+        (priceMap.get(email) ?? 0) + pricePerMinute / playingAtMinute.size,
       )
     }
   }
 
-  console.log(' >> priceMap:', priceMap)
   return priceMap
 }

@@ -24,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover.tsx'
+import { toFixedIfNeeded } from '~/lib/utils.ts'
 import type { User } from '~/schemas/auth.ts'
 import type { Participant } from '~/schemas/bill.ts'
 
@@ -115,11 +116,19 @@ export default function CreateBillParticipantsCommand({
                     />
                     <Label
                       htmlFor={`checkbox-${user.email}`}
-                      className="w-full"
+                      className="min-w-32 max-w-32 overflow-hidden text-ellipsis text-nowrap"
                     >
                       {user.name}
                     </Label>
                   </div>
+                  {participant && (
+                    <div className="border-400 text-nowrap rounded-3xl border border-gray-700 px-2 py-1 text-[10px] font-medium leading-none">
+                      {participant.startTime === startTime.unix() &&
+                        participant.endTime === endTime.unix()
+                        ? 'Full hours'
+                        : `${toFixedIfNeeded((participant.endTime - participant.startTime) / 60)} minutes`}
+                    </div>
+                  )}
                   {participant && (
                     <Popover>
                       <PopoverTrigger>
