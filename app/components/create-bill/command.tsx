@@ -1,5 +1,4 @@
 import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
 import { Edit } from 'lucide-react'
 import {
   type ChangeEvent,
@@ -24,6 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover.tsx'
+import dayjs from '~/lib/dayjs.ts'
 import { toFixedIfNeeded } from '~/lib/utils.ts'
 import type { User } from '~/schemas/auth.ts'
 import type { Participant } from '~/schemas/bill.ts'

@@ -1,10 +1,10 @@
 import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json, useLoaderData } from '@remix-run/react'
-import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import { ObjectId } from 'mongodb'
 import { useState } from 'react'
 
+import dayjs from '~/lib/dayjs.ts'
 import { calculateParticipantsPrice } from '~/lib/price.ts'
 import { formatToCurrency, toFixedIfNeeded } from '~/lib/utils.ts'
 import { billSchema } from '~/schemas/bill.ts'
@@ -21,8 +21,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 export default function BillDetail() {
   const bill = useLoaderData<typeof loader>()
   const [priceMap] = useState(() => calculateParticipantsPrice(bill))
-
-  console.log(' >> bill:', bill)
 
   return (
     <div className="flex flex-col gap-3">

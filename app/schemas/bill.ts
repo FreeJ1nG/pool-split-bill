@@ -1,6 +1,7 @@
-import dayjs from 'dayjs'
 import { ObjectId } from 'mongodb'
 import { z } from 'zod'
+
+import dayjs from '~/lib/dayjs.ts'
 
 import { userBuilderSchema, userSchema } from './auth.ts'
 

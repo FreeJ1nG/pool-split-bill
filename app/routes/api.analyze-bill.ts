@@ -44,8 +44,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     bill ? { bill: encodeURIComponent(bill) } : {},
   ).toString()
 
-  console.log(' >>', bill)
-
   if (bill) {
     return redirect(`/new?${searchParams}`)
   }

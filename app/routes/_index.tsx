@@ -1,11 +1,11 @@
 import { json } from '@remix-run/node'
 import { useLoaderData, useNavigate } from '@remix-run/react'
-import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import { Plus } from 'lucide-react'
 
 import { Avatar, AvatarFallback } from '~/components/ui/avatar.tsx'
 import { Button } from '~/components/ui/button.tsx'
+import dayjs from '~/lib/dayjs.ts'
 import {
   cn,
   formatToCurrency,

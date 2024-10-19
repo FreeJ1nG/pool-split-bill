@@ -15,11 +15,11 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from '@remix-run/react'
-import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import jwt from 'jsonwebtoken'
 
 import Navbar from '~/components/navbar/index.tsx'
+import dayjs from '~/lib/dayjs.ts'
 import { AuthStoreProvider } from '~/lib/providers/auth-store.tsx'
 import {
   sessionJwtTokenSchema,

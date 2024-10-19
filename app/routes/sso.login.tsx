@@ -1,12 +1,12 @@
 import type { LoaderFunctionArgs } from '@remix-run/node'
 import { type ActionFunctionArgs, redirect } from '@remix-run/node'
-import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import { XMLParser } from 'fast-xml-parser'
 import type { Document, WithId, WithoutId } from 'mongodb'
 
 import { PROFILE_COLOR_CHOICES } from '~/constants/color.ts'
 import { issueJwt } from '~/lib/auth.ts'
+import dayjs from '~/lib/dayjs.ts'
 import type { User } from '~/schemas/auth.ts'
 import { ssoValidateTicketResponseSchema, userSchema } from '~/schemas/auth.ts'
 import { commitSession, getSession } from '~/sessions.ts'

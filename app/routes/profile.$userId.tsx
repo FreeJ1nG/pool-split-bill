@@ -1,7 +1,6 @@
 import { PopoverClose } from '@radix-ui/react-popover'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { Form, useLoaderData } from '@remix-run/react'
-import dayjs from 'dayjs'
 import { getDb } from 'db/init'
 import { ObjectId } from 'mongodb'
 
@@ -25,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover.tsx'
+import dayjs from '~/lib/dayjs.ts'
 import { getAbbreviatedName } from '~/lib/utils.ts'
 import { userSchema } from '~/schemas/auth.ts'
 
@@ -56,8 +56,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function UserProfile() {
   const { user, error } = useLoaderData<typeof loader>()
-
-  console.log(' >> user:', user)
 
   return (
     <div className="flex flex-col items-center">
